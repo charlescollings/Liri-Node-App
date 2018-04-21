@@ -6,7 +6,6 @@ var Spotify = require('node-spotify-api');
 
 var spotify = new Spotify(keyFile.spotify);
 var client = new Twitter(keyFile.twitter);
-console.log(client)
 
 // get user input from terminal
 var inquirer = require('inquirer');
@@ -23,31 +22,49 @@ inquirer
   .then(function(inquirerResponse) {
       console.log(inquirerResponse.chooseCommand)
 
-      client.get('statuses/user_timeline', function(error, tweets, response) {
-        if(error) {
-            console.log(error)
-        };
-        console.log(tweets);  // The favorites. 
-        for (let i=0; i < 20; i++) {
-            console.log(tweets[i].text)
-        }
-        // console.log(response);  // Raw response object. 
-      });
+    if (inquirerResponse.chooseCommand === `my-tweets`) {
+        client.get('statuses/user_timeline', function(error, tweets, response) {
+          if(error) {
+              console.log(error)
+          };
+          for (let i=0; i < 20; i++) {
+              console.log(tweets[i].text)
+          }
+        });
+    }
+    else if (inquirerResponse.chooseCommand === `spotify-this-song`) {
+        console.log("Spotify chosen")
+        inquirer
+            .prompt([
+                {
+                    type: "input",
+                    message: "Type song name here:",
+                    name: "songName"
+                },
+            ])
+            .then(function(inquirerResponse) {
+                console.log(inquirerResponse.songName)
 
-    // if (inquirerResponse.chooseCommand === 'my-tweets') {
-    // // This will show your last 20 tweets and when they were created at in your terminal/bash window.
-// 
-    //   // We then run the request module on a URL with a JSON
-    //     request("https://api.twitter.com/1.1/search/tweets.json?q=@ccCoder17&count=20", function(error, response, body) {
-    //         // If there were no errors and the response code was 200 (i.e. the request was successful)...
-    //         if (!error && response.statusCode === 200) {       
-    //           // Then we print out the imdbRating
-    //           console.log("Last 20 tweets: " + JSON.parse(body));
-    //         }
-    //       });
-    // }
+                spotify.search({ type: 'track', query: inquirerResponse.songName, limit: 1}, function(err, data) {
+                    if (err) {
+                      return console.log('Error occurred: ' + err);
+                    }
+                    console.log(data.tracks.items[0].artists[0].name); 
+                    console.log(data.tracks.items[0].name);
+                    console.log(data.tracks.items[0].preview_url);
+                    console.log(data.tracks.items[0].album.name);
+                    // let artists = data.tracks.items[0].artists;
+                    // artists.forEach(el => console.log(el.name));
+                });
+            });
 
+    }
+    else if (inquirerResponse.chooseCommand === `movie-this`) {
+
+    }
+    else if (inquirerResponse.chooseCommand === `do-what-it-says`) {
+
+    }
+ 
 
   });
-
-  // if input = "my-tweets" then show last 20 tweets in terminal
